@@ -25,7 +25,7 @@ pip install --user jmespath
 
 curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 
-4) Clone the Repository 
+5) Clone the Repository 
 
     git clone https://github.com/automateyournetwork/CiscoIOSFacts.git
 
