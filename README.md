@@ -29,6 +29,22 @@ curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 
     git clone https://github.com/automateyournetwork/CiscoIOSFacts.git
 
-#### CUSTOMIZE
+### CUSTOMIZE
 In the hosts file replace the dummy CORE / DISTRIBUTION / ACCESS hostnames with your own hostnames. 
 Ensure Linux host running Ansible playbook can SSH into targetted hosts using prompted username and password. 
+
+### Run the playbook
+After updating the hosts file with the proper hostnames run the playbook.
+
+cd CiscoIOSFacts
+cd playbooks
+ansible-playbook CiscoCoreFacts.yml
+<answer prompts for credentials> 
+<playbook gathers facts>
+<playbook creates files>
+cd ..
+cd documentation/CAMPUS/FACTS/CORE/
+ls
+Review files 
+    
+Run CiscoDistFacts.yml or CiscoAccessFacts.yml after customizing hosts and gather facts and create reports for those logical layer.s
