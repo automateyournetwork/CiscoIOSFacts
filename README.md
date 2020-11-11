@@ -48,3 +48,7 @@ ls
 Review files 
     
 Run CiscoDistFacts.yml or CiscoAccessFacts.yml after customizing hosts and gather facts and create reports for those logical layer.s
+
+#### DEVELOPMENT NOTES 
+Developed with VS Code, Ansible, CentOS
+Tested at vertical scale (1+n devices in the CORE / DIST / ACCESS groups) and horizontally against Cisco 2960,3560,3750,3850,4500,6500,9300 hardware platforms.
