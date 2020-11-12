@@ -379,12 +379,6 @@
       shell: "npx markmap-cli ../documentation/FACTS/CAMPUS/ACCESS/{{ inventory_hostname }}_Interface_facts.md"
       register: markmap
 
-# Gather Ansible Facts About Access #
-    - name: Gather Ansible Facts About Access
-      ios_facts:
-        gather_subset:
-          - all
-
 # Remove file #
     - name: Remove file (delete file)
       file:
