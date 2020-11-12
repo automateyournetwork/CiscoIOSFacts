@@ -303,7 +303,7 @@
     - name: Data Row
       lineinfile:
         path: ../documentation/FACTS/CAMPUS/ACCESS/{{ inventory_hostname }}_Interface_facts.md
-        line: "| {{ item.key }} | {{ item.value.description }} | {{ item.value.operstatus }} | {{ item.value.lineprotocol }} | {% if item.value.ipv4 %} {{ item.value.ipv4 }} {% else %} NA | NA {% endif %} | {{ item.value.bandwidth }} | {{ item.value.duplex }} | {{ item.value.macaddress }} | {{ item.value.type }} | {{ item.value.mediatype }} | {{ item.value.mtu }}"
+        line: "| {{ item.key }} | {{ item.value.description }} | {{ item.value.operstatus }} | {{ item.value.lineprotocol }} | {% if item.value.ipv4 %} {{ item.value.ipv4 }} {% else %} NA | NA {% endif %} | {{ item.value.bandwidth }} | {{ item.value.duplex }} | {{ item.value.macaddress }} | {{ item.value.type }} | {{ item.value.mediatype }} | {{ item.value.mtu }} |"
         create: yes
       loop: "{{ ansible_facts.net_interfaces | dict2items }}" 
 
