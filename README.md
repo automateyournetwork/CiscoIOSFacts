@@ -67,6 +67,10 @@ Review files
 
 Run CiscoDistFacts.yml or CiscoAccessFacts.yml after customizing hosts and gather facts and create reports for those logical layers.
 
+### Topology
+
+![Toplogy](/topology.png?raw=true")
+
 ### Output files
 
 The following files are created per host:
