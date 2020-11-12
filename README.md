@@ -49,6 +49,35 @@ Review files
     
 Run CiscoDistFacts.yml or CiscoAccessFacts.yml after customizing hosts and gather facts and create reports for those logical layer.s
 
+### Output files
+The following files are created per host:
+
+IOS Facts - General 
+{{ inventory_hostname }}_IOS_Facts_RAW.json - ALL RAW JSON returned data
+{{ inventory_hostname }}_IOS_Facts_Nice.json - All JSON returned data filtered to Nice JSON
+{{ inventory_hostname }}_IOS_Facts.yml - All returned data in Nice YAML
+{{ inventory_hostname }}_IOS_facts.csv - Custom fields in CSV 
+{{ inventory_hostname }}_IOS_facts.md - Custom fields in Markdown 
+{{ inventory_hostname }}_IOS_facts.html - Custom fields interactive HTML mind map 
+
+IOS Facts - IP Addresses
+{{ inventory_hostname }}_IP_facts.csv - All IP addresses in CSV 
+{{ inventory_hostname }}_IP_facts.md - All IP addresses in Markdown
+{{ inventory_hostname }}_IP_facts.html - All IP Address interactive HTML mind map 
+
+IOS Facts - Interfaces 
+Includes physical interfaces, SVIs, port-channels, subinterfaces, tunnel interfaces, and loopback interfaces 
+{{ inventory_hostname }}_Interface_facts.csv - All interfaces in CSV 
+{{ inventory_hostname }}_Interface_facts.md - All interfaces in Markdown
+{{ inventory_hostname }}_Interface_facts.html - All interfaces interactive HTML mind map 
+
+IOS Facts - Neighbors
+Includes all CDP detected neighbors
+{{ inventory_hostname }}_Neighbor_facts.csv - All neighbors in CSV
+{{ inventory_hostname }}_Neighbor_facts.md - All neighbors in Markdown
+{{ inventory_hostname }}_Neighbor_facts.html - All neighbors interactive mind map
+
 #### DEVELOPMENT NOTES 
 Developed with VS Code, Ansible, CentOS
-Tested at vertical scale (1+n devices in the CORE / DIST / ACCESS groups) and horizontally against Cisco 2960,3560,3750,3850,4500,6500,9300 hardware platforms.
+Tested at vertical scale (1+n devices in the CORE / DIST / ACCESS groups) and horizontally against:
+Cisco Catalyst 2960,3560,3750,3850,4500,6500,9300 hardware platforms
