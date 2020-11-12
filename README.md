@@ -2,6 +2,8 @@
 
 Ansible Playbooks to gather and transform Cisco IOS Facts into human readable documentation automatically
 
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/automateyournetwork/CiscoIOSFacts)
+
 ## Written by John Capobianco
 
 Using the Ansible ios_facts module these playbooks first gather facts, displays the facts to the screen, saves RAW JSON, Nice JSON, Nice YAML, CSV, Markdown, and interactive HTML Mind Map files from the returned stateful data. 
