@@ -1,0 +1,528 @@
+---
+
+- hosts: CampusDist
+  vars_prompt:
+    - name: IOS_User_Prompt
+      prompt: "Enter Cisco IOS Username"
+      private: no 
+    - name: IOS_Password_Prompt
+      prompt: "Enter IOS Password"
+      private: yes      
+  tasks:
+# Register Username and Password #
+    - set_fact:   
+        ios_user: "{{ IOS_User_Prompt }}"     
+        ios_password: "{{ IOS_Password_Prompt }}"
+      no_log: true
+      delegate_to: localhost
+      run_once: true   
+
+# Gather Ansible Facts About Distribution #
+    - name: Gather Ansible Facts About Distribution
+      ios_facts:
+        gather_subset:
+          - all
+
+# Print facts on screen #          
+    - debug: 
+        msg: "{{ ansible_facts }}"
+
+## GLOBAL IOS FACTS SECTION ##
+# Create JSON file with Ansible Facts #
+    - name: Create RAW JSON file
+      copy: 
+        content: | 
+          {{ ansible_facts }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_Facts_RAW.json
+
+# Create JSON file with Ansible Facts #
+    - name: Create raw JSON file
+      copy: 
+        content: | 
+          {{ ansible_facts | to_nice_json }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_Facts_Nice.json
+
+# Create YAML file with Ansible Facts #
+    - name: Create raw YAML
+      copy: 
+        content: | 
+          {{ ansible_facts | to_nice_yaml }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_Facts.yml
+
+# Add Headers to YAML #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_Facts.yml
+        insertbefore: BOF
+        line: ---        
+      delegate_to: localhost
+
+# Set Facts #
+    - set_fact:
+        image: "{{ ansible_facts['net_image'] }}"
+        version: "{{ ansible_facts['net_version'] }}"
+        serial: "{{ ansible_facts['net_serialnum'] }}"
+        model: "{{ ansible_facts['net_model'] }}"
+        ip_addresses: "{{ ansible_facts['net_all_ipv4_addresses'] }}"
+        disk_total: "{{ ansible_facts | json_query('net_filesystems_info.bootdisk.spacetotal_kb') }}"
+        disk_free: "{{ ansible_facts | json_query('net_filesystems_info.bootdisk.spacefree_kb') }}"
+        mem_total: "{{ ansible_facts['net_memtotal_mb'] | default('N/A') }}"
+        mem_free: "{{ ansible_facts['net_memfree_mb'] | default('N/A') }}"
+
+# Create CSV file with results #
+    - name: Create CSV
+      copy: 
+        content: | 
+          {{ inventory_hostname }},{{ image }},{{ version }},{{ serial }},{{ model }},{{ disk_total }},{{ disk_free }},{{ mem_total }},{{ mem_free }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.csv       
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.csv
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.csv
+        regexp: "'"
+        replace: ''
+
+# Add Header Row to CSV #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.csv
+        insertbefore: BOF
+        line: Hostname,Image,Version,Serial Number,Model,Total Disk,Free Disk,Total Memory,Free Memory
+
+# Create Markdown file with results #
+    - name: Create Markdown
+      copy: 
+        content: | 
+          | {{ inventory_hostname }} | {{ image }} | {{ version }} | {{ serial }} | {{ model }} | {{ disk_total }} | {{ disk_free }} | {{ mem_total }} | {{ mem_free }} |
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md 
+      
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md
+        regexp: '],'
+        replace: ']\n'
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format Markdown #
+    - name: Format Markdown File Commas to Pipes
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md
+        regexp: ','
+        replace: ' | '
+        
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md
+        regexp: "'"
+        replace: ''
+
+# Add Header Rows to Markdown #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md
+        insertbefore: BOF
+        line: "{{ item.property }}"
+      with_items:
+        - { property: '| -------- | ----- | ------- | ------------- | ----- | ---------- | --------- | ------------ | ----------- |' }
+        - { property: '| Hostname | Image | Version | Serial Number | Model | Total Disk | Free Disk | Total Memory | Free Memory |' }
+        - { property: '# Cisco IOS Facts for {{ inventory_hostname }}' }        
+
+# Create Mind Map # 
+    - name: create Distribution Facts Mind Map 
+      shell: "npx markmap-cli ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IOS_facts.md"
+      register: markmap
+
+## IP ADDRESS FACTS SECTION ##
+# Create CSV file with IP results #
+    - name: Create IP CSV
+      copy: 
+        content: | 
+          {{ ip_addresses }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.csv       
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.csv
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.csv
+        regexp: "'"
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.csv
+        regexp: ','
+        replace: '\n'
+
+# Add Header Row to CSV #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.csv
+        insertbefore: BOF
+        line: IP Addresses
+
+# Create Markdown file with results #
+    - name: Create Markdown
+      copy: 
+        content: | 
+          {{ ip_addresses }}
+        dest: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md 
+      
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md
+        regexp: ','
+        replace: '\n'
+
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md
+        regexp: '^'
+        replace: '| '
+
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md
+        regexp: '$'
+        replace: ' |'
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md
+        regexp: '\[|\]|"'
+        replace: ''          
+
+# Add Header Rows to Markdown #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md
+        insertbefore: BOF
+        line: "{{ item.property }}"
+      with_items:
+        - { property: '| -------------- |' }
+        - { property: '| IPv4 Addresses |' }
+        - { property: '# IP Addresses for {{ inventory_hostname }}' }        
+
+# Create Mind Map # 
+    - name: create Distribution IP Address Mind Map 
+      shell: "npx markmap-cli ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_IP_facts.md"
+      register: markmap
+
+## Interface Facts Section ##
+
+# Remove file #
+    - name: Remove file (delete file)
+      file:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        state: absent
+
+# Create Interface CSV file with results #
+    - name: Data Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        line: "{{ item.key }},{{ item.value.description }},{{ item.value.operstatus }},{{ item.value.lineprotocol }},{% if item.value.ipv4 %} {{ item.value.ipv4 }} {% else %} NA,NA {% endif %},{{ item.value.bandwidth }},{{ item.value.duplex }},{{ item.value.macaddress }},{{ item.value.type }},{{ item.value.mediatype }},{{ item.value.mtu }}"
+        create: yes
+      loop: "{{ ansible_facts.net_interfaces | dict2items }}" 
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        regexp: "'"
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        regexp: "{subnet: "
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        regexp: "address: "
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        regexp: "}"
+        replace: ''
+
+# Add Header Row to CSV #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.csv
+        insertbefore: BOF
+        line: Interface,Description,Administrative Status,Line Protocol,Subnet Mask,IP Address,Bandwidth,Duplex,MAC Address,Type,Media Type,MTU
+
+# Remove file #
+    - name: Remove file (delete file)
+      file:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        state: absent
+
+# Create Interface Markdown file with results #
+    - name: Data Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        line: "| {{ item.key }} | {{ item.value.description }} | {{ item.value.operstatus }} | {{ item.value.lineprotocol }} | {% if item.value.ipv4 %} {{ item.value.ipv4 }} {% else %} NA | NA {% endif %} | {{ item.value.bandwidth }} | {{ item.value.duplex }} | {{ item.value.macaddress }} | {{ item.value.type }} | {{ item.value.mediatype }} | {{ item.value.mtu }}"
+        create: yes
+      loop: "{{ ansible_facts.net_interfaces | dict2items }}" 
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: '\[|\]|"'
+        replace: ''      
+      
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: '],'
+        replace: ']\n'
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format Markdown #
+    - name: Format Markdown File Commas to Pipes
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: ','
+        replace: ' | '
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: "'"
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: "{subnet: "
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: "address: "
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        regexp: "}"
+        replace: ''
+
+# Add Header Rows to Markdown #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md
+        insertbefore: BOF
+        line: "{{ item.property }}"
+      with_items:
+        - { property: '| --------- | ----------- | --------------------- | ------------- | ----------- | ---------- | --------- | ------ | ----------- | ---- | ---------- | --- |' }
+        - { property: '| Interface | Description | Administrative Status | Line Protocol | Subnet Mask | IP Address | Bandwidth | Duplex | MAC Address | Type | Media Type | MTU |' }
+        - { property: '# Cisco Interface Facts for {{ inventory_hostname }}' }
+
+# Create Mind Map # 
+    - name: create Distribution Interface Mind Map 
+      shell: "npx markmap-cli ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Interface_facts.md"
+      register: markmap
+
+# Gather Ansible Facts About Distribution #
+    - name: Gather Ansible Facts About Distribution
+      ios_facts:
+        gather_subset:
+          - all
+
+# Remove file #
+    - name: Remove file (delete file)
+      file:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        state: absent
+
+# Create Interface CSV file with results #
+    - name: Data Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        line: "{{ item.key }},{{ item.value }}"
+        create: yes
+      loop: "{{ ansible_facts.net_neighbors | dict2items }}" 
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        regexp: "'"
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        regexp: "{host:"
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        regexp: "port:"
+        replace: ''
+
+# Format CSV #
+    - name: Format CSV File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        regexp: "}"
+        replace: ''
+
+# Add Header Row to CSV #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.csv
+        insertbefore: BOF
+        line: Interface,Neighbor,Port
+
+# Remove file #
+    - name: Remove file (delete file)
+      file:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        state: absent
+
+# Create Interface Markdown file with results #
+    - name: Data Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        line: "| {{ item.key }} | {{ item.value }} |"
+        create: yes
+      loop: "{{ ansible_facts.net_neighbors | dict2items }}" 
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: '\[|\]|"'
+        replace: ''      
+      
+# Format Markdown #
+    - name: Format Markdown File New Lines
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: '],'
+        replace: ']\n'
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: '\[|\]|"'
+        replace: ''      
+
+# Format Markdown #
+    - name: Format Markdown File Commas to Pipes
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: ','
+        replace: ' | '
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: "'"
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: "{host:"
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: "port:"
+        replace: ''
+
+# Format Markdown #
+    - name: Format Markdown File Clean Up
+      replace:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        regexp: "}"
+        replace: ''
+
+# Add Header Rows to Markdown #
+    - name: Header Row
+      lineinfile:
+        path: ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md
+        insertbefore: BOF
+        line: "{{ item.property }}"
+      with_items:
+        - { property: '| --------- | -------- | ---- |' }
+        - { property: '| Interface | Neighbor | Port |' }
+        - { property: '# Cisco Neighbor Facts for {{ inventory_hostname }}' }
+
+# Create Mind Map # 
+    - name: create Distribution IP Address Mind Map 
+      shell: "npx markmap-cli ../documentation/FACTS/CAMPUS/DISTRIBUTION/{{ inventory_hostname }}_Neighbor_facts.md"
+      register: markmap              

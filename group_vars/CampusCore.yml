@@ -1,0 +1,7 @@
+---
+
+# Network provider:
+ansible_connection: network_cli
+ansible_network_os: ios
+ansible_user: "{{ hostvars[inventory_hostname]['ios_user'] | default('') }}"
+ansible_ssh_pass: "{{ hostvars[inventory_hostname]['ios_password'] | default('') }}"

@@ -1,0 +1,31 @@
+---
+discovered_interpreter_python:
+net_all_ipv4_addresses:
+net_all_ipv6_addresses: []
+net_api: cliconf
+net_config:
+net_filesystems:
+- 'bootdisk:'
+net_filesystems_info:
+    'bootdisk:':
+        spacefree_kb:
+        spacetotal_kb:
+net_gather_network_resources: []
+net_gather_subset:
+- hardware
+- default
+- interfaces
+- config
+net_hostname: CORE
+net_image: 
+net_interfaces:
+net_iostype: IOS
+net_memfree_mb:
+net_memtotal_mb:
+net_model:
+net_neighbors:
+net_python_version:
+net_serialnum: 
+net_system: ios
+net_version: 
+network_resources: {}

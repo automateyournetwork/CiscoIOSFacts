@@ -1,0 +1,3 @@
+# Cisco Interface Facts for CORE
+| Interface | Description | Administrative Status | Line Protocol | Subnet Mask | IP Address | Bandwidth | Duplex | MAC Address | Type | Media Type | MTU |
+| --------- | ----------- | --------------------- | ------------- | ----------- | ---------- | --------- | ------ | ----------- | ---- | ---------- | --- |
